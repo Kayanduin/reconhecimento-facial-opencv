@@ -22,6 +22,8 @@ while (True):
             nome = 'Rafael'
         elif id == 2:
             nome = 'Gabriel'
+        elif id == 3:
+            nome = 'Jonatas'
         cv2.putText(imagem, nome, (x, y + (a + 30)), font, 2, (0, 0, 255))
         cv2.putText(imagem, str(confianca), (x, y + (a + 50)), font, 1, (0, 0, 255))
 
