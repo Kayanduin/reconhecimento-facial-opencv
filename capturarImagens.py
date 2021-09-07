@@ -16,21 +16,42 @@ while (True):
     imagemCinza = cv2.cvtColor(imagem, cv2.COLOR_BGR2GRAY)
     rostosDetectados = classificadorRosto.detectMultiScale(imagemCinza, scaleFactor=1.5, minSize=(150, 150))
 
-    for (x, y, l, a) in rostosDetectados:
-        luminosidadeAmbiente = "Luminosidade do ambiente: " + str(np.average(imagemCinza))
-        cv2.rectangle(imagem, (x, y), (x + l, y + a), (0, 0, 255), 2)
-        cv2.putText(imagem, luminosidadeAmbiente, (x, y + (a + 30)), fonteTexto, 0.8, (0, 0, 255))
-        regiaoRosto = imagem[y:y + a, x: x + l]
+    for (pontoInicialLarguraRetangulo, pontoInicialAlturaRetangulo, pontoFinalLarguraRetangulo,
+         pontoFinalAlturaRetangulo) in rostosDetectados:
+
+        valorLuminosidadeAmbiente = np.average(imagemCinza)
+        luminosidadeAmbiente = "Luminosidade do ambiente: " + str(valorLuminosidadeAmbiente)
+
+        cv2.rectangle(imagem, (pontoInicialLarguraRetangulo, pontoInicialAlturaRetangulo),
+                      (pontoInicialLarguraRetangulo + pontoFinalLarguraRetangulo,
+                       pontoInicialAlturaRetangulo + pontoFinalAlturaRetangulo), (0, 0, 255),
+                      2)
+
+        cv2.putText(imagem, luminosidadeAmbiente,
+                    (pontoInicialLarguraRetangulo, pontoInicialAlturaRetangulo + (pontoFinalAlturaRetangulo + 30)),
+                    fonteTexto, 0.8, (0, 0, 255))
+
+        regiaoRosto = imagem[pontoInicialAlturaRetangulo:pontoInicialAlturaRetangulo + pontoFinalAlturaRetangulo,
+                      pontoInicialLarguraRetangulo: pontoInicialLarguraRetangulo + pontoFinalLarguraRetangulo]
+
         regiaoCinzaOlho = cv2.cvtColor(regiaoRosto, cv2.COLOR_BGR2GRAY)
         olhosDetectados = classificadorOlho.detectMultiScale(regiaoCinzaOlho)
 
-        for (ox, oy, ol, oa) in olhosDetectados:
-            cv2.rectangle(regiaoRosto, (ox, oy), (ox + ol, oy + oa), (0, 255, 0), 2)
+        for (pontoInicialLarguraRetanguloOlho, pontoInicialAlturaRetanguloOlho, pontoFinalLarguraRetanguloOlho,
+             pontoFinalAlturaRetanguloOlho) in olhosDetectados:
+
+            cv2.rectangle(regiaoRosto, (pontoInicialLarguraRetanguloOlho, pontoInicialAlturaRetanguloOlho), (
+                pontoInicialLarguraRetanguloOlho + pontoFinalLarguraRetanguloOlho,
+                pontoInicialAlturaRetanguloOlho + pontoFinalAlturaRetanguloOlho), (0, 255, 0), 2)
 
             if cv2.waitKey(50):
-                if np.average(imagemCinza) > 110:
-                    imagemFace = cv2.resize(imagemCinza[y:y + a, x:x + l], (larguraFoto, alturaFoto))
-                    cv2.imwrite("fotos/pessoa." + str(id) + "." + str(amostra) + ".jpg", imagemFace)
+                if valorLuminosidadeAmbiente > 110:
+                    imagemRosto = cv2.resize(
+                        imagemCinza[pontoInicialAlturaRetangulo:pontoInicialAlturaRetangulo + pontoFinalAlturaRetangulo,
+                        pontoInicialLarguraRetangulo:pontoInicialLarguraRetangulo + pontoFinalLarguraRetangulo],
+                        (larguraFoto, alturaFoto))
+
+                    cv2.imwrite("fotos/pessoa." + str(id) + "." + str(amostra) + ".jpg", imagemRosto)
                     print("[foto " + str(amostra) + " capturada com sucesso]")
                     amostra += 1
     cv2.imshow("Face", imagem)
